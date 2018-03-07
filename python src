@@ -1,0 +1,111 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon May 01 18:03:00 2017
+
+@author: mr maulray
+"""
+import json
+import csv
+import os
+import numpy as np
+import fileinput
+import matplotlib.pyplot as plt
+from scipy.spatial import distance
+
+#f= open("F:\\uni\\uni\\software engineering\\y3\\intelegent systems\\intelegent systems\\text\\LeeLongTerm1_Lee_26112004_DVD561_Transmission_10_GFP_100_5CO2_10_15_454_6810_A1_U2OS_CONTROL_0_NULL_1_1_288_280_U.txt", "r")
+dir_path = open("C:\Users\mr maulray\Desktop\jsonz\json", "r")
+dk=open("C:\\Users\\mr maulray\\Desktop\\csv\\LeeLongTerm1_Lee_26112004_DVD561_Transmission_10_GFP_100_5CO2_10_15_454_6810_A1_U2OS_CONTROL_0_60_1_6_123_304_U.txt", "r")
+#for line in dir_path:  
+for line in dk: 
+process(line) # itterrator
+#
+for filename in os.listdir(dir_path):
+    ln = os.path.splitext(os.path.basename(filename))[0]
+    # get the drug name (CONTROL/TPT)
+    metadata=ln.split("_")            
+    drug = metadata[15]
+    # open the lineage file for reading
+    rjn = open(os.path.join(dir_path,filename), 'r')
+    data = json.load(rjn)
+    all_cells = {}
+#
+ all_cells[data["CellName"]] = [data["Event"], int(data["Minutes (E)"]),  int(data["X (E)"]), int(data["Y (E)"]), metadata[15]]
+
+    for child in get_children(data):
+        all_cells[child["CellName"]] = [child["Event"], int(child["Minutes (E)"]),  int(child["X (E)"]), int(child["Y (E)"]), metadata[15]]
+
+    # Calculate the IMT & IMD
+    # loop through the all_cells dictionary 
+    for cell in all_cells.keys():
+         # if the event is mitosis
+        if all_cells[cell][0] == "M2":
+            
+             control_mitotic_events[get_generation_number(cell)] += 1
+
+                control_mitotic_tp.append(all_cells[cell][1])
+                
+            if drug == "TPT":
+            #update the mitotic event number as per generation in the list
+                TPT_mitotic_events[get_generation_number(cell)] += 1
+
+            # append the timepoint of mitosis to the list
+                TPT_mitotic_tp.append(all_cells[cell][1])
+             if get_generation_number(cell) > 0:
+                mother = cell[:len(cell)-1]
+                imt = all_cells[cell][1] -all_cells[mother][1]
+                imd = distance.euclidean((all_cells[cell][2], all_cells[cell][3])
+                 fw.write("%s\t%s\t%s\n" %(data["CellName"], data["Event"], data["Minutes (E)"]))
+ "--------------------------------------------------------------------------------------"
+                # write IMT, IMD and Treatment information on csv file
+                fcw.writerow([imt, imd, all_cells[cell][4]]) 
+
+       
+             #update the death event number as per generation in the list
+        if all_cells[cell][0] == "D":
+            
+            if drug == "CONTROL":
+                control_death_events[len(cell)-1] += 1
+            # append the timepoint of death event to the list
+                control_death_tp.append(all_cells[cell][1])
+                
+            if drug == "TPT":
+                tpt_death_events[len(cell)-1] += 1
+            # append the timepoint of death event to the list
+                tpt_death_tp.append(all_cells[cell][1])
+            
+treatment = ['CONTROL', 'TPT']
+# two lists of 0’s to count the number of mitotic and death events 
+TPT_mitotic_events = [0] * 8
+TPT_death_events = [0] * 8
+CONTROL_mitotic_events = [0] * 8
+CONTROL_death_events = [0] * 8
+#
+# function/method to get the children of the root node in a recursive fashion
+def get_children(node):
+    for child in node['children']:
+        yield child
+        for grandchild in get_children(child):
+            yield grandchild
+#
+def get_generation_number(cell_name):
+    return len(cell_name)-1
+#file path to CSV dataset
+fw = open('C:\Users\mr maulray\Desktop\selinfo\\bbn.txt', 'w')
+fcw = csv.writer(open("F:\\uni\\uni\\software engineering\\y3\\intelegent systems\\results\\rezltz.csv", "w")
+
+for filename in os.listdir(dir_path):
+    ln = os.path.splitext(os.path.basename(filename))[0]
+    # get the drug name (CONTROL/TPT)
+    metadata=ln.split("_")            
+    drug = metadata[15]
+    
+    # open the lineage file for reading
+    f = open(os.path.join(dir_path,filename), 'r')
+
+    # load all information from the file into an object
+    data = json.load(f)
+    # Create an dictionary to hold the information for each cell of the lineage
+    all_cells = {}
+    
+    # assign cellular information to the dictionary as follows 
+    all_cells[data["CellName"]] = [data["Event"], int(data["Minutes (E)"]),  int(data["X (E)"]), int(data["Y (E)"]), metadata[15]]
